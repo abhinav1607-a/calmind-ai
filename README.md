@@ -3,7 +3,7 @@
 A responsive Flask starter app for mood check-ins, journaling, supportive Gemini-powered chat, basic TextBlob sentiment analysis, and CSV export for Orange Data Mining.
 
 ## Features
-- Account registration and login with hashed passwords
+- No login or registration required; each browser gets its own anonymous workspace
 - MongoDB persistence for users, moods, journals, and chat history
 - Gemini-powered companion when a valid API key is configured
 - TextBlob sentiment estimate for journal entries
@@ -29,7 +29,7 @@ Edit `.env` with a strong `SECRET_KEY`, your MongoDB connection string in `MONGO
 - Use MongoDB Atlas or another reachable MongoDB deployment; configure its network access securely.
 
 ## Orange Data Mining
-Use the **Export CSV** link after signing in. In Orange, load the downloaded `calmind-moods.csv` with the **File** widget and connect it to **Data Table**, **Distributions**, or other analysis widgets.
+Use the **Export CSV** link in the header. In Orange, load the downloaded `calmind-moods.csv` with the **File** widget and connect it to **Data Table**, **Distributions**, or other analysis widgets.
 
 ## Important
-This is an educational starter, not a clinical tool or substitute for mental-health care. TextBlob sentiment is approximate. Before public use, add CSRF protection, rate limiting, stronger session settings, input validation, monitoring, and backups. Set a unique secret in production; never commit `.env` or API keys. Password reset, email verification, account deletion, and MFA are not included.
+This is an educational starter, not a clinical tool or substitute for mental-health care. TextBlob sentiment is approximate. This no-login version uses an anonymous browser session to separate each visitor’s mood check-ins and journal entries. Clearing browser cookies or changing browsers may create a new workspace. Before public use, add CSRF protection, rate limiting, stronger session settings, input validation, monitoring, and backups. Set a unique secret in production; never commit `.env` or API keys.
