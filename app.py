@@ -62,12 +62,12 @@ def add_mood():
     valid = {"Great": 5, "Good": 4, "Okay": 3, "Low": 2, "Anxious": 1}
     if mood not in valid:
         return jsonify({"error": "Choose a valid mood."}), 400
-    result = moods.insert_one({"user_id": session["user_id"], "mood": mood, "score": valid[mood], "note": note, "created_at": datetime.utcnow()})
+    result = moods.insert_one({"user_id": visitor_id(), "mood": mood, "score": valid[mood], "note": note, "created_at": datetime.utcnow()})
     return jsonify({"ok": True, "id": str(result.inserted_id)}), 201
 
 @app.get("/api/journals")
 def get_journals():
-    rows = list(journals.find({"user_id": session["user_id"]}).sort("created_at", -1).limit(30))
+    rows = list(journals.find({"user_id": visitor_id()}).sort("created_at", -1).limit(30))
     return jsonify([serialize(r) for r in rows])
 
 @app.post("/api/journals")
@@ -78,7 +78,7 @@ def add_journal():
     if not body:
         return jsonify({"error": "Write a few words before saving."}), 400
     analysis = TextBlob(body).sentiment
-    row = {"user_id": session["user_id"], "title": title or "Untitled reflection", "body": body, "polarity": round(float(analysis.polarity), 3), "subjectivity": round(float(analysis.subjectivity), 3), "created_at": datetime.utcnow()}
+    row = {"user_id": visitor_id(), "title": title or "Untitled reflection", "body": body, "polarity": round(float(analysis.polarity), 3), "subjectivity": round(float(analysis.subjectivity), 3), "created_at": datetime.utcnow()}
     result = journals.insert_one(row)
     return jsonify({"ok": True, "id": str(result.inserted_id), "sentiment": sentiment_label(row["polarity"])}), 201
 
@@ -115,12 +115,12 @@ def chat():
         except Exception:
             app.logger.exception("Gemini request failed")
             return jsonify({"error": "The AI service is temporarily unavailable. Check your Gemini API key and connection."}), 502
-    chats.insert_one({"user_id": session["user_id"], "message": message, "reply": reply, "created_at": datetime.utcnow()})
+    chats.insert_one({"user_id": visitor_id(), "message": message, "reply": reply, "created_at": datetime.utcnow()})
     return jsonify({"reply": reply, "sentiment": sentiment_label(TextBlob(message).sentiment.polarity)})
 
 @app.get("/api/export.csv")
 def export_csv():
-    rows = list(moods.find({"user_id": session["user_id"]}, {"_id": 0, "user_id": 0}))
+    rows = list(moods.find({"user_id": visitor_id()}, {"_id": 0, "user_id": 0}))
     df = pd.DataFrame(rows) if rows else pd.DataFrame(columns=["mood", "score", "note", "created_at"])
     if "created_at" in df:
         df["created_at"] = pd.to_datetime(df["created_at"]).astype(str)
