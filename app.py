@@ -1,13 +1,11 @@
 import os
 from datetime import datetime, timedelta
-from functools import wraps
+import uuid
 
 import pandas as pd
 from dotenv import load_dotenv
-from flask import Flask, Response, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, Response, jsonify, render_template, request, session
 from flask_pymongo import PyMongo
-from werkzeug.security import check_password_hash, generate_password_hash
-from bson import ObjectId
 from textblob import TextBlob
 
 load_dotenv()
@@ -16,26 +14,13 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "change-this-development-secr
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/calmind")
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
 mongo = PyMongo(app)
-users, moods, journals, chats = mongo.db.users, mongo.db.moods, mongo.db.journals, mongo.db.chats
+moods, journals, chats = mongo.db.moods, mongo.db.journals, mongo.db.chats
 
-def current_user():
-    uid = session.get("user_id")
-    if not uid:
-        return None
-    try:
-        return users.find_one({"_id": ObjectId(uid)}, {"password_hash": 0})
-    except Exception:
-        return None
-
-def login_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        if not current_user():
-            if request.path.startswith("/api/"):
-                return jsonify({"error": "Please log in first."}), 401
-            return redirect(url_for("login"))
-        return fn(*args, **kwargs)
-    return wrapper
+def visitor_id():
+    """Give each browser a private anonymous workspace without requiring an account."""
+    if "visitor_id" not in session:
+        session["visitor_id"] = str(uuid.uuid4())
+    return session["visitor_id"]
 
 def serialize(doc):
     if not doc:
@@ -48,49 +33,12 @@ def serialize(doc):
 
 @app.get("/")
 def index():
-    return render_template("index.html", user=current_user())
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        if not name or not email or len(password) < 8:
-            return render_template("auth.html", mode="register", error="Enter your name, a valid email, and a password of at least 8 characters.")
-        if users.find_one({"email": email}):
-            return render_template("auth.html", mode="register", error="An account with this email already exists.")
-        result = users.insert_one({"name": name, "email": email, "password_hash": generate_password_hash(password), "created_at": datetime.utcnow()})
-        session["user_id"] = str(result.inserted_id)
-        return redirect(url_for("index"))
-    return render_template("auth.html", mode="register", error=None)
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        user = users.find_one({"email": email})
-        if not user or not check_password_hash(user["password_hash"], request.form.get("password", "")):
-            return render_template("auth.html", mode="login", error="Email or password is incorrect.")
-        session["user_id"] = str(user["_id"])
-        return redirect(url_for("index"))
-    return render_template("auth.html", mode="login", error=None)
-
-@app.post("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("index"))
-
-@app.get("/api/me")
-@login_required
-def api_me():
-    user = current_user()
-    return jsonify({"id": str(user["_id"]), "name": user["name"], "email": user["email"]})
+    visitor_id()
+    return render_template("index.html")
 
 @app.get("/api/summary")
-@login_required
 def summary():
-    uid = session["user_id"]
+    uid = visitor_id()
     since = datetime.utcnow() - timedelta(days=7)
     mood_rows = list(moods.find({"user_id": uid, "created_at": {"$gte": since}}).sort("created_at", 1))
     journal_rows = list(journals.find({"user_id": uid, "created_at": {"$gte": since}}).sort("created_at", 1))
@@ -104,7 +52,7 @@ def summary():
 @app.get("/api/moods")
 @login_required
 def get_moods():
-    rows = list(moods.find({"user_id": session["user_id"]}).sort("created_at", -1).limit(30))
+    rows = list(moods.find({"user_id": visitor_id()}).sort("created_at", -1).limit(30))
     return jsonify([serialize(r) for r in rows])
 
 @app.post("/api/moods")
