@@ -4,7 +4,7 @@ A responsive Flask starter app for mood check-ins, journaling, supportive Gemini
 
 ## Features
 - No login or registration required; each browser gets its own anonymous workspace
-- MongoDB persistence for users, moods, journals, and chat history
+- MongoDB persistence for anonymous browser sessions’ moods, journals, and chat history
 - Gemini-powered companion when a valid API key is configured
 - TextBlob sentiment estimate for journal entries
 - Seven-day dashboard summary and CSV export
