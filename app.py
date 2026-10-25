@@ -50,13 +50,11 @@ def summary():
     return jsonify({"mood_count": len(mood_rows), "journal_count": len(journal_rows), "average_mood": avg, "mood_counts": mood_counts, "moods": [serialize(r) for r in mood_rows], "journals": [serialize(r) for r in journal_rows[-5:][::-1]]})
 
 @app.get("/api/moods")
-@login_required
 def get_moods():
     rows = list(moods.find({"user_id": visitor_id()}).sort("created_at", -1).limit(30))
     return jsonify([serialize(r) for r in rows])
 
 @app.post("/api/moods")
-@login_required
 def add_mood():
     data = request.get_json(silent=True) or {}
     mood = str(data.get("mood", "")).strip()
@@ -68,13 +66,11 @@ def add_mood():
     return jsonify({"ok": True, "id": str(result.inserted_id)}), 201
 
 @app.get("/api/journals")
-@login_required
 def get_journals():
     rows = list(journals.find({"user_id": session["user_id"]}).sort("created_at", -1).limit(30))
     return jsonify([serialize(r) for r in rows])
 
 @app.post("/api/journals")
-@login_required
 def add_journal():
     data = request.get_json(silent=True) or {}
     title = str(data.get("title", "")).strip()[:120]
@@ -94,7 +90,6 @@ def sentiment_label(polarity):
     return "Neutral"
 
 @app.post("/api/chat")
-@login_required
 def chat():
     data = request.get_json(silent=True) or {}
     message = str(data.get("message", "")).strip()[:4000]
@@ -124,7 +119,6 @@ def chat():
     return jsonify({"reply": reply, "sentiment": sentiment_label(TextBlob(message).sentiment.polarity)})
 
 @app.get("/api/export.csv")
-@login_required
 def export_csv():
     rows = list(moods.find({"user_id": session["user_id"]}, {"_id": 0, "user_id": 0}))
     df = pd.DataFrame(rows) if rows else pd.DataFrame(columns=["mood", "score", "note", "created_at"])
