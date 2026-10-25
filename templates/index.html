@@ -7,10 +7,10 @@
 <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
 </head>
 <body>
-<header class="topbar"><a class="brand" href="/"><span class="brand-mark">✦</span> calmind<span class="brand-ai">AI</span></a><div class="top-actions">{% if user %}<span class="muted">Hello, {{ user.name }}</span><form method="post" action="{{ url_for('logout') }}"><button class="button subtle" type="submit">Sign out</button></form>{% else %}<a class="button subtle" href="{{ url_for('login') }}">Sign in</a><a class="button primary" href="{{ url_for('register') }}">Get started</a>{% endif %}</div></header>
+<header class="topbar"><a class="brand" href="/"><span class="brand-mark">✦</span> calmind<span class="brand-ai">AI</span></a><div class="top-actions"><span class="muted">Your private space</span><a class="button subtle" href="/api/export.csv">Export CSV ↓</a></div></header>
 <main class="shell">
-<section class="hero"><div><p class="eyebrow">A LITTLE SPACE FOR YOU</p><h1>Make room for <em>how you feel.</em></h1><p class="hero-copy">Check in with yourself, write what’s on your mind, and take the next small step at your own pace.</p>{% if not user %}<a class="button primary" href="{{ url_for('register') }}">Begin your journey ↗</a>{% else %}<a class="button primary" href="#checkin">Take a moment ↗</a>{% endif %}</div><div class="hero-orb"><span>✦</span></div></section>
-{% if user %}
+<section class="hero"><div><p class="eyebrow">A LITTLE SPACE FOR YOU</p><h1>Make room for <em>how you feel.</em></h1><p class="hero-copy">Check in with yourself, write what’s on your mind, and take the next small step at your own pace.</p><a class="button primary" href="#checkin">Take a moment ↗</a></div><div class="hero-orb"><span>✦</span></div></section>
+
 <section class="stats"><article class="stat"><span class="eyebrow">MOOD CHECK-INS · 7 DAYS</span><strong id="mood-count">—</strong><span class="muted">Moments noticed</span></article><article class="stat"><span class="eyebrow">JOURNAL ENTRIES · 7 DAYS</span><strong id="journal-count">—</strong><span class="muted">Thoughts explored</span></article><article class="stat"><span class="eyebrow">AVERAGE MOOD · 7 DAYS</span><strong id="average-mood">—</strong><span class="muted">Out of 5</span></article></section>
 <nav class="tabs"><a href="#checkin">Mood check-in</a><a href="#journal">Journal</a><a href="#companion">AI companion</a><a href="/api/export.csv">Export CSV ↓</a></nav>
 <section class="content-grid">
@@ -18,9 +18,7 @@
 <article class="panel" id="journal"><p class="eyebrow">02 / REFLECT</p><h2>Put it into words.</h2><p class="muted">A few lines can help make sense of a busy mind.</p><label>Entry title <input id="journal-title" maxlength="120" placeholder="A thought to keep"></label><label>Your reflection <textarea id="journal-body" maxlength="10000" class="journal-body" placeholder="Start wherever you are…"></textarea></label><button id="save-journal" class="button primary">Save reflection</button><p id="journal-feedback" class="feedback" aria-live="polite"></p><h3 class="subhead">Recent reflections</h3><div id="journal-history" class="history muted">Your reflections will appear here.</div></article>
 <article class="panel companion" id="companion"><p class="eyebrow">03 / GENTLE CONVERSATION</p><h2>Your mindful companion.</h2><p class="muted">Share what’s on your mind. Calmind can offer grounding ideas, reflection prompts, and a listening space.</p><div id="chat-messages" class="chat-messages"><div class="chat-bubble assistant">Hi, I’m here with you. What’s on your mind today?</div></div><form id="chat-form" class="chat-form"><textarea id="chat-input" maxlength="4000" required placeholder="Write what you’re feeling…"></textarea><button class="button primary" type="submit">Send ↗</button></form><p id="chat-feedback" class="feedback" aria-live="polite"></p><p class="fineprint">Calmind is not a therapist or emergency service. If you may be in immediate danger, contact local emergency services or someone you trust.</p></article>
 </section>
-{% else %}
-<section class="content-grid public-grid"><article class="panel"><p class="eyebrow">NOTICE · NAME · NURTURE</p><h2>Small moments matter.</h2><p class="muted">Track your moods, keep a private journal, and explore supportive prompts with your AI companion.</p></article><article class="panel"><p class="eyebrow">YOUR SPACE, YOUR PACE</p><h2>Start with one breath.</h2><p class="muted">Create an account to keep your reflections and mood check-ins together.</p><a class="button primary" href="{{ url_for('register') }}">Create your space ↗</a></article></section>
-{% endif %}
+
 <footer class="footer"><span>✦ Calmind AI</span><span>Be gentle with yourself.</span><span>Made for mindful moments</span></footer>
 </main>
 </body></html>
