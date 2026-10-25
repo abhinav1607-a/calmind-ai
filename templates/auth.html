@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ 'Create account' if mode == 'register' else 'Welcome back' }} · Calmind AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+<a class="brand auth-brand" href="/"><span class="brand-mark">✦</span> calmind<span class="brand-ai">AI</span></a>
+<main class="auth-card">
+<p class="eyebrow">YOUR MINDFUL AI COMPANION</p>
+<h1>{{ 'Create your account' if mode == 'register' else 'Welcome back' }}</h1>
+<p class="muted">A quiet space to check in, reflect, and find your next small step.</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<form method="post">
+{% if mode == 'register' %}<label>Your name<input name="name" required maxlength="80" autocomplete="name"></label>{% endif %}
+<label>Email address<input name="email" type="email" required autocomplete="email"></label>
+<label>Password<input name="password" type="password" required minlength="8" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}"></label>
+<button class="button primary" type="submit">{{ 'Create account' if mode == 'register' else 'Sign in' }}</button>
+</form>
+<p class="auth-switch">{% if mode == 'register' %}Already have an account? <a href="{{ url_for('login') }}">Sign in</a>{% else %}New to Calmind? <a href="{{ url_for('register') }}">Create an account</a>{% endif %}</p>
+<p class="fineprint">Calmind supports reflection and mindfulness; it is not a medical or emergency service.</p>
+</main>
+</body></html>
